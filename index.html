@@ -37,14 +37,17 @@
     </div>
 
     <div class="game-container">
-      <div class="game-message">
-        <p></p>
-        <div class="lower">
-	        <a class="keep-playing-button">Keep going</a>
-          <a class="retry-button">Yritä uudestaan!</a>
-        </div>
-      </div>
-
+     <div class="game-message">
+  <p></p>
+  <div id="score-submit" style="display:none; margin: 15px 0;">
+    <input type="text" id="player-name-input" placeholder="Nimesi" maxlength="20">
+    <button id="submit-score-button">Tallenna pisteet</button>
+  </div>
+  <div class="lower">
+    <a class="keep-playing-button">Keep going</a>
+    <a class="retry-button">Yritä uudestaan!</a>
+  </div>
+</div>
       <div class="grid-container">
         <div class="grid-row">
           <div class="grid-cell"></div>
@@ -99,51 +102,39 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzcXVueGpudnNnc3FpY2ppcW50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDk2ODQsImV4cCI6MjEwMzIyNTY4NH0.yMCzwI3Slk6bUrESzhXBCOwSH0O-mnMhRfDtSrV5hRk";
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function tallennaPisteet(nimi, pisteet) {
-      const { error } = await sb
-        .from('scores')
-        .insert([{ name: nimi, score: pisteet }]);
-      if (error) console.error("Virhe tallennuksessa:", error);
-    }
-
-    async function haeTop10() {
-      const { data, error } = await sb
-        .from('scores')
-        .select('name, score')
-        .order('score', { ascending: false })
-        .limit(10);
-      if (error) {
-        console.error("Virhe haussa:", error);
-        return [];
-      }
-      return data;
-    }
-
-    function naytaLeaderboard(data) {
-      const list = document.getElementById('leaderboard-list');
-      list.innerHTML = '';
-      data.forEach(function (rivi) {
-        const li = document.createElement('li');
-        li.textContent = rivi.name + ' — ' + rivi.score;
-        list.appendChild(li);
-      });
-    }
-
     async function tallennaPisteetJaNaytaTulokset(pisteet) {
-      if (pisteet > 0) {
-        const nimi = prompt("Peli ohi! Pisteesi: " + pisteet + "\nSyötä nimesi listalle:");
-        if (nimi) {
-          await tallennaPisteet(nimi.substring(0, 20), pisteet);
-        }
-      }
-      const top10 = await haeTop10();
-      naytaLeaderboard(top10);
-    }
+  const submitDiv = document.getElementById('score-submit');
+  const nameInput = document.getElementById('player-name-input');
+  const submitButton = document.getElementById('submit-score-button');
 
-    window.addEventListener('DOMContentLoaded', async function () {
-      const top10 = await haeTop10();
-      naytaLeaderboard(top10);
+  if (pisteet > 0) {
+    submitDiv.style.display = 'block';
+    nameInput.value = '';
+    nameInput.focus();
+
+    // Poistetaan vanha kuuntelija ettei se kertaannu useaan kertaan
+    const uusiButton = submitButton.cloneNode(true);
+    submitButton.parentNode.replaceChild(uusiButton, submitButton);
+
+    uusiButton.addEventListener('click', async function () {
+      const nimi = nameInput.value.trim();
+      if (nimi) {
+        await tallennaPisteet(nimi.substring(0, 20), pisteet);
+        submitDiv.style.display = 'none';
+        const top10 = await haeTop10();
+        naytaLeaderboard(top10);
+      }
     });
+
+    // Enter-näppäin toimii myös
+    nameInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') uusiButton.click();
+    });
+  } else {
+    const top10 = await haeTop10();
+    naytaLeaderboard(top10);
+  }
+}
   </script>
 </body>
 </html>
