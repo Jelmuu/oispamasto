@@ -889,6 +889,14 @@ font-size: 0 !important;
 #nicorette-button:hover {
   background: #388e3c;
 }
+.bg-deco {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none; }
 
+.bg-reunamerkki {
+  top: 20px;
+  right: -60px;
+  width: 250px; }
 
 
