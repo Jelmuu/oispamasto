@@ -158,9 +158,10 @@
           }
         });
 
-        nameInput.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter') uusiButton.click();
-        });
+       nameInput.addEventListener('keydown', function (e) {
+  e.stopPropagation(); // Estää näppäimen vaikuttamasta peliin
+  if (e.key === 'Enter') uusiButton.click();
+});
       } else {
         const top10 = await haeTop10();
         naytaLeaderboard(top10);
